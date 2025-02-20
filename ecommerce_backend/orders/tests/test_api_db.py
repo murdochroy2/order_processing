@@ -5,7 +5,7 @@ from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
-from .models import Order, OrderStatus
+from orders.models import Order, OrderStatus
 
 class OrderViewTests(TransactionTestCase):
     def setUp(self):

@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 from django.db import IntegrityError, connection
 from django.utils import timezone
-from .models import Order, OrderStatus
+from ..models import Order, OrderStatus
 
 class OrderQueue:
     _instance = None
