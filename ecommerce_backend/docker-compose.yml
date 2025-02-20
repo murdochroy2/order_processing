@@ -35,7 +35,7 @@ services:
       - DEBUG=0
     volumes:
       - .:/app
-    entrypoint: python manage.py test orders -v 2
+    entrypoint: python manage.py test orders.tests -v 2
 
 volumes:
   postgres_data: 

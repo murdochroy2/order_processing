@@ -3,8 +3,8 @@ from django.utils import timezone
 from datetime import timedelta
 import time
 
-from .models import Order, OrderStatus
-from .queue_manager import OrderQueue
+from orders.models import Order, OrderStatus
+from orders.core.queue_manager import OrderQueue
 
 class OrderQueueTests(TransactionTestCase):
     def setUp(self):

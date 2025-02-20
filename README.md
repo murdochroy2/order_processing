@@ -88,9 +88,9 @@ docker compose run --rm test
 ```
 
 ## Running Load Tests
-
+To simulate 1000 users making concurrent requests per second for 30 seconds, run the following command:
 ```bash
-docker compose exec web locust -f locustfile.py --headless --users 1000 --spawn-rate 1000 --run-time 15s --csv=locust_results --host http://127.0.0.1:8000
+docker compose exec web locust -f locustfile.py --headless --users 1000 --spawn-rate 1000 --run-time 30s --csv=locust_results --host http://127.0.0.1:8000
 ```
 
 ## Limitations and Possible Improvements
