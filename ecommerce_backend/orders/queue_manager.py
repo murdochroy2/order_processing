@@ -2,6 +2,7 @@ import queue
 import threading
 import time
 from datetime import datetime
+from django.db import IntegrityError, connection
 from django.utils import timezone
 from .models import Order, OrderStatus
 
@@ -36,17 +37,23 @@ class OrderQueue:
                 order.processing_started_at = timezone.now()
                 order.save()
 
-                # Simulate processing time (1-3 seconds)
-                time.sleep(1)
-
                 order.status = OrderStatus.COMPLETED
                 order.processing_completed_at = timezone.now()
                 order.save()
                 self.queue.task_done()
             except queue.Empty:
                 continue
+            except IntegrityError as e:
+                if 'unique constraint' in str(e).lower():
+                    print(f"Duplicate order detected: {e}")
+                    self.queue.task_done()
+                else:
+                    print(f"Database integrity error: {e}")
             except Exception as e:
                 print(f"Error processing order: {e}")
+            finally:
+                # Close the database connection after each iteration
+                connection.close()
 
     def stop_processing(self):
         self.is_running = False
