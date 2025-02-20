@@ -2,40 +2,37 @@
 
 This is a Django-based backend system for processing e-commerce orders asynchronously.
 
+## Prerequisites
+
+- Docker and Docker Compose installed on your system
+  - Docker Desktop. [Install Docker](https://docs.docker.com/get-docker/)
+  - Docker Compose. [Install Docker Compose](https://docs.docker.com/compose/install/)
+
 ## Running with Docker
 
 1. Clone the repository
+   ```bash
+   git clone https://github.com/murdochroy2/order_processing.git
+   cd ecommerce_backend
+   ```
 2. Build and start the containers:
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
    This will start both the Django application and PostgreSQL database.
 
 3. The API will be available at http://localhost:8000/api/
 
-## Running Locally (without Docker)
-
-1. Clone the repository
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run migrations:
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
-5. Start the server:
-   ```bash
-   python manage.py runserver
-   ```
-
 ## API Endpoints
+
+### Postman Collection (Recommended)
+Use the [Ecommerce API.postman_collection.json](./Ecommerce%20API.postman_collection.json) file to import the API endpoints into Postman.
+
+### Get All Orders
+
+```bash
+curl http://localhost:8000/api/orders/
+```
 
 ### Create Order 
 
@@ -62,6 +59,8 @@ curl http://localhost:8000/api/orders/ORD001/
 curl http://localhost:8000/api/orders/metrics/
 ```
 
+
+
 ## Design Decisions
 
 1. **Queue Implementation**: Used an in-memory queue with a singleton pattern to ensure single queue instance across the application.
@@ -74,23 +73,31 @@ curl http://localhost:8000/api/orders/metrics/
 3. **Asynchronous Processing**: 
    - Implemented using threading for simplicity
    - Queue processor runs in a separate daemon thread
-   - Orders are processed one at a time with simulated processing time
 
 ## Assumptions
 
 1. Order IDs are unique and provided by the client
-2. Processing time is simulated (1-3 seconds)
-3. The system runs on a single instance (for simplicity)
-4. No authentication/authorization implemented
-5. In-memory queue means orders might be lost if server crashes
+2. The system runs on a single instance (for simplicity)
+3. No authentication/authorization implemented
+4. In-memory queue means orders might be lost if server crashes
+
+## Running Tests
+
+```bash
+docker compose run --rm test
+```
+
+## Running Load Tests
+
+```bash
+docker compose exec web locust -f locustfile.py --headless --users 1000 --spawn-rate 1000 --run-time 15s --csv=locust_results --host http://127.0.0.1:8000
+```
 
 ## Limitations and Possible Improvements
 
 1. Replace in-memory queue with Redis or RabbitMQ for persistence
-2. Add authentication and authorization
-3. Implement proper error handling and retries
-4. Add more comprehensive metrics and monitoring
-5. Implement horizontal scaling capabilities
+2. Implement proper error handling and retries
+4. Implement horizontal scaling capabilities
 
 ## Docker Configuration
 
@@ -103,14 +110,14 @@ The application is containerized using Docker and includes:
 To rebuild the containers:
 
 ```bash
-docker-compose down
-docker-compose up --build
+docker compose down
+docker compose up --build
 ```
 
 To view logs:
 
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
 This Docker configuration:
