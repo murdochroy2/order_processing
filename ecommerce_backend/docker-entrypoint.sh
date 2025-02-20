@@ -10,4 +10,4 @@ python manage.py migrate
 
 # Start server
 echo "Starting server..."
-gunicorn ecommerce_backend.wsgi:application --bind 0.0.0.0:8000 
+gunicorn ecommerce_backend.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --reload
