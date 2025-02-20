@@ -26,7 +26,7 @@ This is a Django-based backend system for processing e-commerce orders asynchron
 ## API Endpoints
 
 ### Postman Collection (Recommended)
-Use the [Ecommerce API.postman_collection.json](./Ecommerce%20API.postman_collection.json) file to import the API endpoints into Postman.
+Use the [Ecommerce API.postman_collection.json](./Ecommerce%20API.postman_collection.json) file to import the API endpoints into Postman. This file is included in the repository.
 
 ### Get All Orders
 
@@ -59,6 +59,28 @@ curl http://localhost:8000/api/orders/ORD001/
 curl http://localhost:8000/api/orders/metrics/
 ```
 
+## Running Tests
+
+```bash
+docker compose run --rm test
+```
+
+## Running Load Tests
+To simulate 1000 users making concurrent requests per second for 30 seconds, run the following below. First ensure that the docker compose is running:
+```bash
+docker compose up
+```
+Then run the following command:
+```bash
+docker compose exec web locust \
+    --headless \
+    --users 1000 \
+    --spawn-rate 1000 \
+    --run-time 30s \
+    --csv=locust_results \
+    --host http://localhost:8000
+```
+
 
 
 ## Design Decisions
@@ -81,18 +103,6 @@ curl http://localhost:8000/api/orders/metrics/
 3. No authentication/authorization implemented
 4. In-memory queue means orders might be lost if server crashes
 
-## Running Tests
-
-```bash
-docker compose run --rm test
-```
-
-## Running Load Tests
-To simulate 1000 users making concurrent requests per second for 30 seconds, run the following command:
-```bash
-docker compose exec web locust -f locustfile.py --headless --users 1000 --spawn-rate 1000 --run-time 30s --csv=locust_results --host http://127.0.0.1:8000
-```
-
 ## Limitations and Possible Improvements
 
 1. Replace in-memory queue with Redis or RabbitMQ for persistence
@@ -113,25 +123,3 @@ To rebuild the containers:
 docker compose down
 docker compose up --build
 ```
-
-To view logs:
-
-```bash
-docker compose logs -f
-```
-
-This Docker configuration:
-1. Uses PostgreSQL instead of SQLite for better performance
-2. Runs the Django application with Gunicorn for production-grade serving
-3. Includes automatic database migrations on startup
-4. Persists database data using Docker volumes
-5. Provides proper environment variable configuration
-6. Uses a slim Python base image to minimize container size
-
-To run the application:
-1. Make sure Docker and Docker Compose are installed
-2. Navigate to the project directory
-3. Run `docker-compose up --build`
-4. Access the API at http://localhost:8000/api/
-
-The application will automatically handle database migrations and start the server.
