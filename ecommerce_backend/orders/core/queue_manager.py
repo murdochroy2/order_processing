@@ -2,7 +2,7 @@ import queue
 import threading
 import time
 from datetime import datetime
-from django.db import IntegrityError, connection
+from django.db import IntegrityError, connection, transaction
 from django.utils import timezone
 from ..models import Order, OrderStatus
 
@@ -33,9 +33,14 @@ class OrderQueue:
         while self.is_running:
             try:
                 order = self.queue.get(timeout=1)
-                order.status = OrderStatus.PROCESSING
-                order.processing_started_at = timezone.now()
-                order.save()
+                with transaction.atomic():
+                    order.status = OrderStatus.PROCESSING
+                    order.processing_started_at = timezone.now()
+                    order.save()
+                    # Force a commit by exiting the transaction block
+                
+                # Simulate processing time
+                time.sleep(1)
 
                 order.status = OrderStatus.COMPLETED
                 order.processing_completed_at = timezone.now()

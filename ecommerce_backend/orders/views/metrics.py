@@ -12,35 +12,40 @@ from orders.core.queue_manager import OrderQueue
 
 class OrderMetricsView(APIView):
     def get(self, request):
-        # Calculate metrics
-        total_orders = Order.objects.filter(status=OrderStatus.COMPLETED).count()
-        status_counts = Order.objects.values('status').annotate(count=Count('status'))
-        
-        # Calculate average processing time for completed orders
+        metrics = {
+            'total_orders_processed': self._get_total_processed_orders().count(),
+            'status_counts': self._get_status_counts(),
+            'average_processing_time_seconds': self._get_average_processing_time()
+        }
+        return Response(metrics)
+
+    def _get_total_processed_orders(self):
         completed_orders = Order.objects.filter(
             status=OrderStatus.COMPLETED,
             processing_started_at__isnull=False,
             processing_completed_at__isnull=False
         )
         
-        avg_processing_time = None
-        if completed_orders.exists():
-            avg_processing_time = completed_orders.aggregate(
-                avg_time=Avg(
-                    F('processing_completed_at') - F('processing_started_at')
-                )
-            )['avg_time']
+        return completed_orders
 
-        status_count_dict = {
-            status[0]: 0 for status in OrderStatus.choices
-        }
+    def _get_status_counts(self):
+        status_count_dict = {status[0]: 0 for status in OrderStatus.choices}
+        # Remove select_for_update() to avoid the error
+        status_counts = Order.objects.values('status').annotate(count=Count('status'))
+        
         for item in status_counts:
             status_count_dict[item['status']] = item['count']
+        
+        return status_count_dict
 
-        metrics = {
-            'total_orders_processed': total_orders,
-            'status_counts': status_count_dict,
-            'average_processing_time_seconds': avg_processing_time.total_seconds() if avg_processing_time else None
-        }
+    def _get_average_processing_time(self):
+        completed_orders = self._get_total_processed_orders()       
+         
+        if not completed_orders.exists():
+            return None
 
-        return Response(metrics)
+        avg_processing_time = completed_orders.aggregate(
+            avg_time=Avg(F('processing_completed_at') - F('processing_started_at'))
+        )['avg_time']
+        
+        return avg_processing_time.total_seconds() if avg_processing_time else None
