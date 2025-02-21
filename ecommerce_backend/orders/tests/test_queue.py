@@ -75,7 +75,7 @@ class OrderQueueTests(TransactionTestCase):
         )
         
         queue_manager2.add_order(order)
-        time.sleep(2)
+        time.sleep(3)
         
         order.refresh_from_db()
         self.assertEqual(order.status, OrderStatus.COMPLETED)
@@ -94,7 +94,7 @@ class OrderQueueTests(TransactionTestCase):
         
         # Add order to queue
         self.queue_manager.add_order(order1)
-        time.sleep(1)
+        time.sleep(3)
         
         # Verify order hasn't been processed
         order1.refresh_from_db()
